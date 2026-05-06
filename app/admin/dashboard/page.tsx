@@ -97,7 +97,7 @@ export default function AdminDashboard() {
                                 fontWeight: '500'
                             }}
                         >
-                            Logout
+                            LogOut
                         </button>
                     </nav>
                 </div>
