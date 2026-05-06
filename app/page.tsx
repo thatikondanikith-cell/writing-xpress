@@ -1,65 +1,106 @@
-import Image from "next/image";
+import Link from 'next/link';
+import Image from 'next/image';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <>
+      <header className="header">
+        <div className="header-content">
+          <Link href="/">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/logo.jpg"
+              alt="Writing Xpress"
+              width={500}
+              height={500}
+              className="header-logo"
+              priority
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </Link>
+          <nav>
+            <Link href="/submit">Submit Order</Link>
+            <Link href="/track">Track Order</Link>
+            <Link href="/admin/login">Admin</Link>
+          </nav>
         </div>
-      </main>
-    </div>
+      </header>
+
+      <section className="hero">
+        <div className="hero-content">
+          <h1>
+            Fast Academic Writing Support in <span className="highlight">24-48 Hours</span>
+          </h1>
+          <p>
+            Professional writing assistance for students. Get high-quality academic support delivered quickly with expert writers dedicated to your success.
+          </p>
+          <div className="hero-cta">
+            <Link href="/submit" className="btn btn-primary">
+              Submit New Order
+            </Link>
+            <Link href="/track" className="btn btn-secondary">
+              Track Your Order
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="container">
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>How It Works</h2>
+          <p style={{ color: '#6B7280' }}>Simple steps to get your academic writing support</p>
+        </div>
+
+        <div className="how-it-works">
+          <div className="how-card">
+            <div className="how-card-number">1</div>
+            <h3>Submit Your Requirements</h3>
+            <p>Fill in your details and upload necessary files with clear instructions for your project</p>
+          </div>
+
+          <div className="how-card">
+            <div className="how-card-number">2</div>
+            <h3>Review & Payment</h3>
+            <p>Check your details, view the price, and make secure payment via UPI or bank transfer</p>
+          </div>
+
+          <div className="how-card">
+            <div className="how-card-number">3</div>
+            <h3>Track Progress</h3>
+            <p>Use your unique Order ID to track order status in real-time</p>
+          </div>
+
+          <div className="how-card">
+            <div className="how-card-number">4</div>
+            <h3>Receive Delivery</h3>
+            <p>Get your completed work delivered within 24-48 hours with quality assurance</p>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '3rem', padding: '2rem', backgroundColor: '#F9FAFB', borderRadius: '8px', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Why Choose Writing Xpress?</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
+            <div>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚡</div>
+              <strong>Fast Turnaround</strong>
+              <p style={{ fontSize: '0.9rem', color: '#6B7280', marginTop: '0.25rem' }}>24-48 hour delivery</p>
+            </div>
+            <div>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✓</div>
+              <strong>Quality Assured</strong>
+              <p style={{ fontSize: '0.9rem', color: '#6B7280', marginTop: '0.25rem' }}>Expert writers</p>
+            </div>
+            <div>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔒</div>
+              <strong>Secure Payment</strong>
+              <p style={{ fontSize: '0.9rem', color: '#6B7280', marginTop: '0.25rem' }}>Safe transactions</p>
+            </div>
+            <div>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✉️</div>
+              <strong>24/7 Support</strong>
+              <p style={{ fontSize: '0.9rem', color: '#6B7280', marginTop: '0.25rem' }}>Always available</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
