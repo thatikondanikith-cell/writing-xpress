@@ -38,7 +38,7 @@ export async function GET(
             if (fs.existsSync(legacyPath)) {
                 const buffer = fs.readFileSync(legacyPath);
                 const contentType = getMimeType(safeFilename);
-                return new NextResponse(buffer, {
+                return new NextResponse(new Uint8Array(buffer), {
                     status: 200,
                     headers: {
                         'Content-Type': contentType,
