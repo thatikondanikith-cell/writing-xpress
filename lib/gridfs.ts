@@ -30,9 +30,11 @@ export async function uploadFileToGridFS(
 
     return new Promise((resolve, reject) => {
         const readable = Readable.from(buffer);
-        const uploadStream = bucket.openUploadStream(filename, {
-            contentType: mimeType,
-        });
+       const uploadStream = bucket.openUploadStream(filename, {
+    metadata: {
+        contentType: mimeType,
+    },
+});
 
         readable.pipe(uploadStream);
 
