@@ -57,7 +57,7 @@ export async function GET(
         // --- GridFS: serve files stored after migration ---
         const { buffer, filename, contentType } = await downloadFileFromGridFS(id);
 
-        return new NextResponse(buffer, {
+        return new NextResponse(new Uint8Array(buffer), {
             status: 200,
             headers: {
                 'Content-Type': contentType,
