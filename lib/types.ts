@@ -10,13 +10,13 @@ export interface Order {
     collegeName: string;
     yearOfStudying: string;
     branch: string; // Mandatory academic branch field
-    uploadedFiles: string[]; // file paths relative to /public/uploads
+    uploadedFiles: string[]; // GridFS ObjectId strings (served via /api/files/[id])
     instructions: string;
     priceAmount?: number;
     transactionId?: string;
     orderStatus: OrderStatus;
     createdDate: string; // ISO string
-    deliveryFile?: string; // file path relative to /public/uploads
+    deliveryFile?: string; // GridFS ObjectId string (served via /api/files/[id])
     physicalDeliveryStatus?: 'Pending' | 'Delivered';
 }
 

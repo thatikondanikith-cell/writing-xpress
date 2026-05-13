@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import { existsSync, mkdirSync } from 'fs';
-import path from 'path';
+import { uploadFileToGridFS } from '@/lib/gridfs';
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,25 +13,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        ];
 
-        // Ensure upload directory exists
-        if (!existsSync(uploadDir)) {
-            mkdirSync(uploadDir, { recursive: true });
-        }
-
-        const uploadedPaths: string[] = [];
+        const uploadedIds: string[] = [];
 
         for (const file of files) {
-            // Validate file type
-            const allowedTypes = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'application/vnd.ms-powerpoint',
-                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            ];
-
             if (!allowedTypes.includes(file.type)) {
                 return NextResponse.json(
                     { error: `Invalid file type: ${file.name}. Only PDF, Word, and PowerPoint files are allowed.` },
@@ -41,24 +31,21 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            // Create unique filename
-            const timestamp = Date.now();
-            const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-            const filename = `${timestamp}-${originalName}`;
-            const filepath = path.join(uploadDir, filename);
-
-            // Convert file to buffer and write
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
-            await writeFile(filepath, buffer);
 
-            // Store relative path (from public folder)
-            uploadedPaths.push(`/uploads/${filename}`);
+            // Use timestamp prefix to keep original filename readable
+            const timestamp = Date.now();
+            const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storedFilename = `${timestamp}-${originalName}`;
+
+            const fileId = await uploadFileToGridFS(buffer, storedFilename, file.type);
+            uploadedIds.push(fileId);
         }
 
         return NextResponse.json({
             success: true,
-            files: uploadedPaths
+            files: uploadedIds, // returns GridFS ObjectId strings
         });
 
     } catch (error) {

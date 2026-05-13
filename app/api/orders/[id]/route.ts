@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrderById, updateOrder } from '@/lib/db';
-import { writeFile } from 'fs/promises';
-import { existsSync, mkdirSync } from 'fs';
-import path from 'path';
+import { uploadFileToGridFS } from '@/lib/gridfs';
 
 // GET order by ID
 export async function GET(
@@ -11,7 +9,7 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const order = getOrderById(id);
+        const order = await getOrderById(id);
 
         if (!order) {
             return NextResponse.json(
@@ -30,7 +28,7 @@ export async function GET(
     }
 }
 
-// PUT update order (admin only - add auth check in production)
+// PUT update order (admin only)
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -44,35 +42,24 @@ export async function PUT(
             const formData = await request.formData();
             const file = formData.get('deliveryFile') as File | null;
             const orderStatus = formData.get('orderStatus') as string | null;
+            const physicalDeliveryStatus = formData.get('physicalDeliveryStatus') as 'Pending' | 'Delivered' | null;
 
             if (file) {
-                const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-
-                if (!existsSync(uploadDir)) {
-                    mkdirSync(uploadDir, { recursive: true });
-                }
+                const bytes = await file.arrayBuffer();
+                const buffer = Buffer.from(bytes);
 
                 const timestamp = Date.now();
                 const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-                const filename = `delivery-${timestamp}-${originalName}`;
-                const filepath = path.join(uploadDir, filename);
+                const storedFilename = `delivery-${timestamp}-${originalName}`;
 
-                const bytes = await file.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                await writeFile(filepath, buffer);
+                // Upload delivery file to GridFS
+                const fileId = await uploadFileToGridFS(buffer, storedFilename, file.type);
 
-                const deliveryFilePath = `/uploads/${filename}`;
+                const updates: any = { deliveryFile: fileId };
+                if (orderStatus) updates.orderStatus = orderStatus;
+                if (physicalDeliveryStatus) updates.physicalDeliveryStatus = physicalDeliveryStatus;
 
-                const updates: any = { deliveryFile: deliveryFilePath };
-                if (orderStatus) {
-                    updates.orderStatus = orderStatus;
-                }
-                const physicalDeliveryStatus = formData.get('physicalDeliveryStatus') as 'Pending' | 'Delivered' | null;
-                if (physicalDeliveryStatus) {
-                    updates.physicalDeliveryStatus = physicalDeliveryStatus;
-                }
-
-                const updatedOrder = updateOrder(id, updates);
+                const updatedOrder = await updateOrder(id, updates);
 
                 if (!updatedOrder) {
                     return NextResponse.json(
@@ -85,10 +72,9 @@ export async function PUT(
             }
         }
 
-        // Handle JSON update (status only)
+        // Handle JSON update (status, physicalDeliveryStatus, etc.)
         const body = await request.json();
-        // body handles any partial update including physicalDeliveryStatus
-        const updatedOrder = updateOrder(id, body);
+        const updatedOrder = await updateOrder(id, body);
 
         if (!updatedOrder) {
             return NextResponse.json(

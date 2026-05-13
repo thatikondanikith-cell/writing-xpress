@@ -171,6 +171,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         }
     };
 
+    // Check if a stored file value is a valid GridFS ObjectId
+    const isGridFSId = (value: string) => /^[a-f\d]{24}$/i.test(value);
+
     return (
         <>
             <header className="header">
@@ -199,7 +202,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="card">
-                    <div className="flex justify-between" style={{ alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div className="card-title-row">
                         <h2 style={{ marginBottom: 0 }}>Order Details</h2>
                         <span className={getStatusBadgeClass(order.orderStatus)} style={{ fontSize: '1rem' }}>
                             {order.orderStatus}
@@ -280,11 +283,15 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                             <div className="review-label">Uploaded Files:</div>
                             <div className="review-value">
                                 <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
-                                    {order.uploadedFiles.map((file, index) => (
+                                    {order.uploadedFiles.map((fileId, index) => (
                                         <li key={index}>
-                                            <a href={file} target="_blank" rel="noopener noreferrer">
-                                                {file.split('/').pop()}
-                                            </a>
+                                            {isGridFSId(fileId) ? (
+                                                <a href={`/api/files/${fileId}`} target="_blank" rel="noopener noreferrer">
+                                                    File {index + 1}
+                                                </a>
+                                            ) : (
+                                                <span style={{ color: '#9ca3af' }}>File {index + 1} (legacy — unavailable)</span>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -325,7 +332,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                     {order.orderStatus === 'Completed' && (
                         <div className="review-section">
                             <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem' }}>Physical Delivery</h3>
-                            <div className="flex actions-row" style={{ alignItems: 'center', gap: '1rem' }}>
+                            <div className="responsive-actions" style={{ alignItems: 'center', gap: '1rem' }}>
                                 <div>
                                     Current Status: <strong>{order.physicalDeliveryStatus || 'Pending'}</strong>
                                 </div>
@@ -367,7 +374,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                             <div className="mb-2">
                                 <p style={{ marginBottom: '0.5rem' }}>Current delivery file:</p>
                                 <a
-                                    href={order.deliveryFile}
+                                    href={`/api/files/${order.deliveryFile}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="btn btn-secondary"

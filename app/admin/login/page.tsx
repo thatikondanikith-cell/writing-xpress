@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
+
 export default function AdminLoginPage() {
     const router = useRouter();
     const [credentials, setCredentials] = useState({
@@ -32,13 +33,15 @@ export default function AdminLoginPage() {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Login failed');
             }
-
+            
             // Store auth in localStorage (simple approach)
-            localStorage.setItem('adminAuth', 'true');
+           localStorage.setItem('adminAuth', 'true');
 
-            // Redirect to dashboard
-            router.push('/admin/dashboard');
+                document.cookie = `adminAuth=true; path=/`;
 
+                setTimeout(() => {
+                    router.push('/admin/dashboard');
+                }, 100);
         } catch (err: any) {
             setError(err.message || 'An error occurred during login');
             setLoading(false);

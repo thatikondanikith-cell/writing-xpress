@@ -23,13 +23,21 @@ body {
   color: var(--text-black);
   line-height: 1.6;
   background-color: var(--bg-white);
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
 }
 
 /* Header - White with Logo */
 .header {
   background-color: var(--bg-white);
   border-bottom: 1px solid var(--border-color);
-  height: 64px;
+  min-height: 64px;
   display: flex;
   align-items: center;
 }
@@ -38,14 +46,15 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0.5rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .header-logo {
-  height: 200px !important;
+  height: clamp(50px, 20vw, 120px) !important;
   width: auto;
   display: block;
   object-fit: contain;
@@ -53,8 +62,10 @@ body {
 
 .header nav {
   display: flex;
-  gap: 2rem;
+  gap: 1.25rem;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .header nav a {
@@ -62,6 +73,7 @@ body {
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
+  white-space: nowrap;
 }
 
 .header nav a:hover {
@@ -113,6 +125,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 1rem;
+  width: 100%;
 }
 
 /* Card */
@@ -122,6 +135,7 @@ body {
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-width: 0;
 }
 
 .card h2 {
@@ -199,6 +213,7 @@ body {
 .form-group select,
 .form-group textarea {
   width: 100%;
+  max-width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -236,6 +251,9 @@ body {
   text-decoration: none;
   text-align: center;
   transition: all 0.2s;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .btn-primary {
@@ -311,6 +329,7 @@ body {
 
 .review-item {
   display: flex;
+  gap: 1rem;
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border-color);
@@ -330,15 +349,20 @@ body {
 
 .review-value {
   color: var(--text-gray);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Table */
 .table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
 table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
   margin-top: 1rem;
 }
@@ -496,6 +520,73 @@ table a:hover {
   gap: 1rem;
 }
 
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.dashboard-toolbar input,
+.dashboard-toolbar select {
+  min-width: 0;
+}
+
+.dashboard-toolbar input {
+  flex: 1 1 240px;
+}
+
+.dashboard-toolbar select {
+  flex: 0 1 220px;
+}
+
+.page-title-row,
+.card-title-row,
+.responsive-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-title-row,
+.card-title-row {
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.responsive-actions {
+  flex-wrap: wrap;
+}
+
+.responsive-actions > .btn,
+.responsive-actions > a.btn,
+.responsive-actions > button {
+  flex: 1 1 180px;
+  margin-right: 0 !important;
+}
+
+.pagination-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.auth-card {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
 /* Loading Spinner */
 .spinner {
   border: 3px solid var(--border-color);
@@ -519,6 +610,40 @@ table a:hover {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1rem 1rem;
+  }
+
+  .header nav {
+    width: 100%;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .header nav a,
+  .header nav button,
+  .header nav .btn {
+    font-size: 0.95rem !important;
+  }
+
+  .container {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .card h2 {
+    font-size: 1.45rem;
+  }
+
+  .hero {
+    padding: 2.5rem 0;
+  }
+
   .hero h1 {
     font-size: 2rem;
   }
@@ -531,11 +656,132 @@ table a:hover {
     flex-direction: column;
   }
 
+  .hero-cta .btn {
+    width: 100%;
+  }
+
   .how-it-works {
     grid-template-columns: 1fr;
   }
 
+  .progress-steps {
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    justify-content: flex-start;
+  }
+
+  .progress-step {
+    flex: 0 0 86px;
+  }
+
+  .progress-step-label {
+    font-size: 0.75rem;
+  }
+
+  .review-section {
+    padding: 1rem;
+  }
+
+  .review-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .review-label {
+    min-width: 0;
+  }
+
+  .flex.justify-between,
+  .card-title-row,
+  .page-title-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .dashboard-toolbar input,
+  .dashboard-toolbar select {
+    flex-basis: 100%;
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+
+  .responsive-actions,
+  .flex.gap-2 {
+    flex-direction: column;
+  }
+
+  .responsive-actions > .btn,
+  .responsive-actions > a.btn,
+  .responsive-actions > button,
+  .flex.gap-2 > .btn,
+  .flex.gap-2 > a.btn,
+  .flex.gap-2 > button {
+    width: 100%;
+  }
+
+  table th,
+  table td {
+    padding: 0.65rem;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
   .header nav {
+    justify-content: stretch;
+  }
+
+  .header nav a,
+  .header nav button,
+  .header nav .btn {
+    flex: 1 1 calc(50% - 0.75rem);
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-badge {
+    font-size: 0.8rem;
+  }
+
+  .pagination-row .btn {
+    flex: 1 1 120px;
+  }
+}
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .menu-btn {
+    display: block;
+  }
+
+  .mobile-nav {
+    display: none;
+    flex-direction: column;
     gap: 1rem;
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .mobile-nav.open {
+    display: flex;
   }
 }

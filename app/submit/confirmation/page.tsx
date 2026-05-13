@@ -109,7 +109,7 @@ export default function ConfirmationPage() {
                 <div className="container">
                     <div className="card text-center">
                         <div className="error-message">{error || 'Order not found'}</div>
-                        <div className="mt-3">
+                        <div className="responsive-actions mt-3">
                             <Link href="/submit" className="btn btn-primary" style={{ marginRight: '1rem' }}>
                                 Submit New Order
                             </Link>
@@ -238,7 +238,7 @@ export default function ConfirmationPage() {
                         </div>
                     </div>
 
-                    <div className="mt-3">
+                    <div className="responsive-actions mt-3">
                         <Link href="/track" className="btn btn-primary" style={{ marginRight: '1rem' }}>
                             Track Your Order
                         </Link>

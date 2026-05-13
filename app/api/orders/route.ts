@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createOrder, getAllOrders } from '@/lib/db';
 import { Order } from '@/lib/types';
+import { resend } from '@/lib/resend';
 
 // GET all orders (admin only - add auth check in production)
 export async function GET(request: NextRequest) {
+    const adminAuth = request.cookies.get('adminAuth');
+
+        if (!adminAuth) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+        
     try {
-        const orders = getAllOrders();
+        const orders = await getAllOrders();
         return NextResponse.json(orders);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -67,8 +77,26 @@ export async function POST(request: NextRequest) {
             transactionId: body.transactionId,
         };
 
-        const newOrder = createOrder(orderData);
+        const newOrder = await createOrder(orderData);
+        
+     console.log('Sending email...');
+        const data = await resend.emails.send({
+    from: 'onboarding@resend.dev',
+    to: 'yourgmail@gmail.com',
+    subject: 'Order Submitted Successfully - Writing Xpress',
 
+    html: `
+        <h2>Order Submitted Successfully</h2>
+
+        <p>Your order has been received successfully.</p>
+
+        <p>
+            <strong>Order ID:</strong> ${newOrder.orderId}
+        </p>
+    `,
+});
+
+console.log(data);
         return NextResponse.json(newOrder, { status: 201 });
 
     } catch (error) {

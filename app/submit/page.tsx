@@ -93,10 +93,14 @@ export default function SubmitPage() {
 
             const { files: uploadedFiles } = await uploadResponse.json();
 
+            // Store original filenames alongside GridFS IDs for display
+            const uploadedFileNames = Array.from(files).map((f) => f.name);
+
             // Store data in sessionStorage for next step
             const submissionData = {
                 ...formData,
-                uploadedFiles,
+                uploadedFiles,       // GridFS IDs
+                uploadedFileNames,   // original display names
             };
             sessionStorage.setItem('submissionData', JSON.stringify(submissionData));
 
@@ -117,8 +121,8 @@ export default function SubmitPage() {
                         <Image
                             src="/logo.jpg"
                             alt="Writing Xpress"
-                            width={150}
-                            height={150}
+                            width={220}
+                            height={220}
                             className="header-logo"
                             priority
                         />
@@ -164,6 +168,7 @@ export default function SubmitPage() {
                             <input
                                 type="text"
                                 name="userName"
+                                autoComplete="name"
                                 value={formData.userName}
                                 onChange={handleChange}
                                 required
@@ -177,6 +182,7 @@ export default function SubmitPage() {
                             <input
                                 type="tel"
                                 name="primaryPhone"
+                                autoComplete="tel"
                                 value={formData.primaryPhone}
                                 onChange={handleChange}
                                 required
@@ -188,6 +194,7 @@ export default function SubmitPage() {
                             <input
                                 type="tel"
                                 name="alternatePhone"
+                                autoComplete="tel"
                                 value={formData.alternatePhone}
                                 onChange={handleChange}
                             />
@@ -200,6 +207,7 @@ export default function SubmitPage() {
                             <input
                                 type="email"
                                 name="email"
+                                autoComplete="email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
@@ -211,6 +219,7 @@ export default function SubmitPage() {
                             <input
                                 type="text"
                                 name="address"
+                                autoComplete="address"
                                 value={formData.address}
                                 onChange={handleChange}
                             />
@@ -223,6 +232,7 @@ export default function SubmitPage() {
                             <input
                                 type="text"
                                 name="collegeName"
+                                autoComplete="organization"
                                 value={formData.collegeName}
                                 onChange={handleChange}
                                 required
@@ -256,6 +266,7 @@ export default function SubmitPage() {
                             <input
                                 type="text"
                                 name="branch"
+                                autoComplete="department"
                                 value={formData.branch}
                                 onChange={handleChange}
                                 placeholder="e.g., Computer Science, Mechanical Engineering"
@@ -269,6 +280,7 @@ export default function SubmitPage() {
                             </label>
                             <input
                                 type="file"
+                                autoComplete="file"
                                 onChange={handleFileChange}
                                 accept=".pdf,.doc,.docx,.ppt,.pptx"
                                 multiple

@@ -75,8 +75,7 @@ export default function TrackOrderPage() {
                         />
                     </Link>
                     <nav>
-                        <Link href="/">Home</Link>
-                        <Link href="/submit">Submit Order</Link>
+                        <Link href="/">Home</Link> 
                     </nav>
                 </div>
             </header>
@@ -149,7 +148,7 @@ export default function TrackOrderPage() {
                                         Your order has been completed and the file is ready for download.
                                     </p>
                                     <a
-                                        href={order.deliveryFile}
+                                        href={`/api/files/${order.deliveryFile}`}
                                         download
                                         target="_blank"
                                         rel="noopener noreferrer"

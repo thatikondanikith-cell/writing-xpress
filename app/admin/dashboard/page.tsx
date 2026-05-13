@@ -9,6 +9,10 @@ import { Order } from '@/lib/types';
 export default function AdminDashboard() {
     const router = useRouter();
     const [orders, setOrders] = useState<Order[]>([]);
+    const [filter, setFilter] = useState('All');
+    const [search, setSearch] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ordersPerPage = 10;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -47,6 +51,7 @@ export default function AdminDashboard() {
 
     const handleLogout = () => {
         localStorage.removeItem('adminAuth');
+        document.cookie = 'adminAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
         router.push('/admin/login');
     };
 
@@ -70,7 +75,47 @@ export default function AdminDashboard() {
             </div>
         );
     }
+    const filteredOrders = orders.filter((order) => {
+    const created = new Date(order.createdDate);
+    const now = new Date();
+    const matchesSearch =
+    order.orderId.toLowerCase().includes(search.toLowerCase()) ||
+    order.userName.toLowerCase().includes(search.toLowerCase()) ||
+    order.email.toLowerCase().includes(search.toLowerCase()) ||
+    order.collegeName.toLowerCase().includes(search.toLowerCase());
 
+if (!matchesSearch) return false;
+
+    if (filter === 'Completed') {
+        return order.orderStatus === 'Completed';
+    }
+
+    if (filter === 'In Progress') {
+        return order.orderStatus === 'In Progress';
+    }
+
+    if (filter === 'Today') {
+        return created.toDateString() === now.toDateString();
+    }
+
+    if (filter === 'This Month') {
+        return (
+            created.getMonth() === now.getMonth() &&
+            created.getFullYear() === now.getFullYear()
+        );
+    }
+
+    return true;
+});
+const indexOfLastOrder = currentPage * ordersPerPage;
+const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+
+const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+);
+
+const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
     return (
         <>
             <header className="header">
@@ -86,6 +131,21 @@ export default function AdminDashboard() {
                         />
                     </Link>
                     <nav>
+                        
+                        <Link
+                            href="/admin/analytics"
+                            className="btn btn-primary"
+                            style={{
+                                backgroundColor: '#111827',
+                                color: 'white',
+                                borderRadius: '8px',
+                                padding: '0.5rem 1rem',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            Analytics
+                        </Link>
+
                         <button
                             onClick={handleLogout}
                             style={{
@@ -105,7 +165,7 @@ export default function AdminDashboard() {
 
             <div className="container" style={{ maxWidth: '1200px' }}>
                 <div className="card">
-                    <div className="flex justify-between" style={{ alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div className="card-title-row">
                         <h2 style={{ marginBottom: 0 }}>Orders Dashboard</h2>
                         <div style={{ color: '#6b7280' }}>
                             Total Orders: <strong>{orders.length}</strong>
@@ -113,12 +173,69 @@ export default function AdminDashboard() {
                     </div>
 
                     {error && <div className="error-message">{error}</div>}
+                    <div className="dashboard-stats-grid">
+            <div className="card">
+                <h3>Total Orders</h3>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                {orders.length}
+                </p>
+            </div>
 
+            <div className="card">
+                <h3>Pending</h3>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#D97706' }}>
+                {orders.filter(o => o.orderStatus === 'Submitted').length}
+                </p>
+            </div>
+
+            <div className="card">
+                <h3>In Progress</h3>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2563EB' }}>
+                {orders.filter(o => o.orderStatus === 'In Progress').length}
+                </p>
+            </div>
+
+            <div className="card">
+                <h3>Completed</h3>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#059669' }}>
+                {orders.filter(o => o.orderStatus === 'Completed').length}
+                </p>
+            </div>
+            </div>
+            <div className="dashboard-toolbar">
+            <input
+            type="text"
+            placeholder="Search orders..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+                padding: '0.5rem 1rem',
+                border: '1px solid #D1D5DB',
+                borderRadius: '6px',
+            }}
+/>
+    <select
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: '1px solid #D1D5DB',
+        }}
+    >
+        <option value="All">All Orders</option>
+        <option value="Today">Today</option>
+        <option value="This Month">This Month</option>
+        <option value="Completed">Completed</option>
+        <option value="In Progress">In Progress</option>
+    </select>
+</div>
                     {orders.length === 0 ? (
                         <p style={{ textAlign: 'center', color: '#6b7280', padding: '2rem' }}>
                             No orders found
                         </p>
                     ) : (
+                        <div>
                         <div className="table-container">
                             <table>
                                 <thead>
@@ -131,24 +248,32 @@ export default function AdminDashboard() {
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
-                                    {orders.map((order) => (
+                                    {currentOrders.map((order) => (
                                         <tr key={order.orderId}>
-                                            <td style={{ fontFamily: 'monospace' }}>{order.orderId}</td>
+                                            <td style={{ fontFamily: 'monospace' }}>
+                                                {order.orderId}
+                                            </td>
+
                                             <td>{order.userName}</td>
+
                                             <td>{order.collegeName}</td>
+
                                             <td>
                                                 <span className={getStatusBadgeClass(order.orderStatus)}>
                                                     {order.orderStatus}
                                                 </span>
                                             </td>
+
                                             <td>
                                                 {new Date(order.createdDate).toLocaleDateString('en-IN', {
                                                     day: '2-digit',
                                                     month: 'short',
-                                                    year: 'numeric'
+                                                    year: 'numeric',
                                                 })}
                                             </td>
+
                                             <td>
                                                 <Link href={`/admin/order/${order.orderId}`}>
                                                     View Details
@@ -159,6 +284,35 @@ export default function AdminDashboard() {
                                 </tbody>
                             </table>
                         </div>
+
+                        <div className="pagination-row">
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                                }
+                                disabled={currentPage === 1}
+                                className="btn btn-secondary"
+                            >
+                                Previous
+                            </button>
+
+                            <span style={{ paddingTop: '0.5rem' }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.min(prev + 1, totalPages)
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                                className="btn btn-primary"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                     )}
                 </div>
             </div>

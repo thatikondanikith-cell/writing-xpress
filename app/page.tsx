@@ -1,7 +1,43 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+type UserAuth = {
+  name: string;
+  email: string;
+};
 
 export default function HomePage() {
+  const router = useRouter();
+  const [user, setUser] = useState<UserAuth | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('userAuth');
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed?.email) {
+        setUser(parsed);
+      } else {
+        localStorage.removeItem('userAuth');
+      }
+    } catch {
+      localStorage.removeItem('userAuth');
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userAuth');
+    setUser(null);
+    router.replace('/');
+    router.refresh();
+  };
+
   return (
     <>
       <header className="header">
@@ -16,9 +52,32 @@ export default function HomePage() {
               priority
             />
           </Link>
-          <nav>
-            <Link href="/submit">Submit Order</Link>
+          <button
+            className="menu-btn"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            ☰
+          </button>
+         <nav className={menuOpen ? 'mobile-nav open' : 'mobile-nav'}>
             <Link href="/track">Track Order</Link>
+            {user ? (
+              <>
+                <Link href="/user/dashboard">Dashboard</Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.4rem 1rem', fontSize: '0.9rem' }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/user/login">Login</Link>
+                <Link href="/user/signup">Signup</Link>
+              </>
+            )}
             <Link href="/admin/login">Admin</Link>
           </nav>
         </div>
@@ -32,14 +91,29 @@ export default function HomePage() {
           <p>
             Professional writing assistance for students. Get high-quality academic support delivered quickly with expert writers dedicated to your success.
           </p>
-          <div className="hero-cta">
-            <Link href="/submit" className="btn btn-primary">
-              Submit New Order
-            </Link>
-            <Link href="/track" className="btn btn-secondary">
-              Track Your Order
-            </Link>
-          </div>
+        <div className="hero-cta">
+  {!user ? (
+    <>
+      <Link href="/user/login" className="btn btn-primary">
+        Login
+      </Link>
+
+      <Link href="/user/signup" className="btn btn-secondary">
+        Signup
+      </Link>
+    </>
+  ) : (
+    <>
+      <Link href="/submit" className="btn btn-primary">
+        Submit New Order
+      </Link>
+
+      <Link href="/user/dashboard" className="btn btn-secondary">
+        Dashboard
+      </Link>
+    </>
+  )}
+</div>
         </div>
       </section>
 

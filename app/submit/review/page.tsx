@@ -140,8 +140,8 @@ export default function ReviewPage() {
                             <div className="review-value">
                                 {submissionData.uploadedFiles.length} file(s)
                                 <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem' }}>
-                                    {submissionData.uploadedFiles.map((file: string, index: number) => (
-                                        <li key={index}>{file.split('/').pop()}</li>
+                                    {(submissionData.uploadedFileNames || submissionData.uploadedFiles).map((name: string, index: number) => (
+                                        <li key={index}>{name}</li>
                                     ))}
                                 </ul>
                             </div>

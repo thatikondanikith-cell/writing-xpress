@@ -1,47 +1,47 @@
 import { Order } from './types';
-import * as fs from 'fs';
-import * as path from 'path';
+import { connectDB } from './mongoose';
+import OrderModel from './models/Order';
 
-const DB_FILE = path.join(process.cwd(), 'data', 'orders.json');
-
-// Ensure data directory and file exist
-function ensureDB() {
-    const dataDir = path.dirname(DB_FILE);
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-    if (!fs.existsSync(DB_FILE)) {
-        fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2), 'utf-8');
-    }
+// Helper to convert a Mongoose document to a plain Order object
+function toOrder(doc: any): Order {
+    const obj = doc.toObject ? doc.toObject() : doc;
+    // Remove MongoDB internal fields
+    const { _id, __v, ...rest } = obj;
+    return rest as Order;
 }
 
 // Read all orders from database
-export function getAllOrders(): Order[] {
-    ensureDB();
-    try {
-        const data = fs.readFileSync(DB_FILE, 'utf-8');
-        return JSON.parse(data) as Order[];
-    } catch (error) {
-        console.error('Error reading orders:', error);
-        return [];
-    }
+export async function getAllOrders(): Promise<Order[]> {
+    await connectDB();
+    const docs = await OrderModel.find().sort({ createdDate: -1 }).lean();
+    return docs.map((doc: any) => {
+        const { _id, __v, ...rest } = doc;
+        return rest as Order;
+    });
 }
 
 // Get order by ID
-export function getOrderById(orderId: string): Order | null {
-    const orders = getAllOrders();
-    return orders.find(order => order.orderId === orderId) || null;
+export async function getOrderById(orderId: string): Promise<Order | null> {
+    await connectDB();
+    const doc = await OrderModel.findOne({ orderId }).lean();
+    if (!doc) return null;
+    const { _id, __v, ...rest } = doc as any;
+    return rest as Order;
 }
 
-// Generate a unique order ID
-export function generateOrderId(): string {
+// Generate a unique order ID (WX-YYYYMMDD-XXXX)
+export async function generateOrderId(): Promise<string> {
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-    const orders = getAllOrders();
 
     // Find the highest sequence number for today
-    const todayOrders = orders.filter(order => order.orderId.startsWith(`WX-${dateStr}`));
-    const sequences = todayOrders.map(order => {
+    const todayOrders = await OrderModel.find({
+        orderId: { $regex: `^WX-${dateStr}-` },
+    })
+        .select('orderId')
+        .lean();
+
+    const sequences = todayOrders.map((order: any) => {
         const parts = order.orderId.split('-');
         return parseInt(parts[2], 10);
     });
@@ -53,38 +53,37 @@ export function generateOrderId(): string {
 }
 
 // Create a new order
-export function createOrder(orderData: Omit<Order, 'orderId' | 'createdDate' | 'orderStatus'>): Order {
-    ensureDB();
+export async function createOrder(
+    orderData: Omit<Order, 'orderId' | 'createdDate' | 'orderStatus'>
+): Promise<Order> {
+    await connectDB();
 
     const newOrder: Order = {
         ...orderData,
-        orderId: generateOrderId(),
+        orderId: await generateOrderId(),
         orderStatus: 'Submitted',
         createdDate: new Date().toISOString(),
         physicalDeliveryStatus: 'Pending',
     };
 
-    const orders = getAllOrders();
-    orders.push(newOrder);
-
-    fs.writeFileSync(DB_FILE, JSON.stringify(orders, null, 2), 'utf-8');
-
-    return newOrder;
+    const doc = await OrderModel.create(newOrder);
+    return toOrder(doc);
 }
 
 // Update an existing order
-export function updateOrder(orderId: string, updates: Partial<Order>): Order | null {
-    ensureDB();
+export async function updateOrder(
+    orderId: string,
+    updates: Partial<Order>
+): Promise<Order | null> {
+    await connectDB();
 
-    const orders = getAllOrders();
-    const index = orders.findIndex(order => order.orderId === orderId);
+    const doc = await OrderModel.findOneAndUpdate(
+        { orderId },
+        { $set: updates },
+        { new: true } // return the updated document
+    ).lean();
 
-    if (index === -1) {
-        return null;
-    }
-
-    orders[index] = { ...orders[index], ...updates };
-    fs.writeFileSync(DB_FILE, JSON.stringify(orders, null, 2), 'utf-8');
-
-    return orders[index];
+    if (!doc) return null;
+    const { _id, __v, ...rest } = doc as any;
+    return rest as Order;
 }
