@@ -77,7 +77,7 @@ export async function downloadFileFromGridFS(fileId: string): Promise<{
             resolve({
                 buffer: Buffer.concat(chunks),
                 filename: fileMeta.filename,
-                contentType: fileMeta.contentType || 'application/octet-stream',
+               contentType: fileMeta.metadata?.contentType || 'application/octet-stream',
             });
         });
         downloadStream.on('error', reject);
